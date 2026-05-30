@@ -5,13 +5,7 @@ import { unzipSync, strFromU8 } from 'fflate';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { INPUT_CAP_CHARS } from '@/lib/models';
-
-const CODE_EXT = new Set([
-  'ts', 'tsx', 'js', 'jsx', 'py', 'go', 'rs', 'java', 'rb', 'php', 'c', 'cpp', 'h', 'hpp',
-  'cs', 'kt', 'swift', 'scala', 'sh', 'sql',
-]);
-
-const SKIP = ['node_modules/', 'dist/', 'build/', '.next/', 'vendor/', '.git/', '__macosx/'];
+import { isCodeFile } from '@/lib/code-files';
 
 export function ZipInput({
   onCode,
@@ -31,13 +25,7 @@ export function ZipInput({
       const buf = new Uint8Array(await file.arrayBuffer());
       const unzipped = unzipSync(buf);
       const entries = Object.entries(unzipped)
-        .filter(([path]) => {
-          const lower = path.toLowerCase();
-          if (lower.endsWith('/')) return false;
-          if (SKIP.some((s) => lower.includes(s))) return false;
-          const ext = path.split('.').pop()?.toLowerCase() ?? '';
-          return CODE_EXT.has(ext);
-        })
+        .filter(([path]) => isCodeFile(path))
         .sort(([, a], [, b]) => b.length - a.length)
         .slice(0, 15);
 

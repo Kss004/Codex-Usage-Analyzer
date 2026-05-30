@@ -16,6 +16,7 @@ import { ScanCard } from '@/components/scan-card';
 import { RoiCalculator } from '@/components/roi-calculator';
 import { SkepticMode } from '@/components/skeptic-mode';
 import { totalMinutesSaved } from '@/lib/roi';
+import { rankCandidates } from '@/lib/rank';
 import { buildReportMarkdown, downloadMarkdown } from '@/lib/export-md';
 
 export default function Home() {
@@ -34,8 +35,8 @@ export default function Home() {
   };
 
   const candidates = object?.candidates ?? [];
-  const readyCandidates = candidates.filter(
-    (c): c is ScanCandidate => !!c && !!c.id && !!c.title && !!c.category,
+  const readyCandidates = rankCandidates(
+    candidates.filter((c): c is ScanCandidate => !!c && !!c.id && !!c.title && !!c.category),
   );
   const scanComplete = !isLoading && readyCandidates.length > 0;
   const totalMins = totalMinutesSaved(readyCandidates);

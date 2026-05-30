@@ -1,6 +1,8 @@
 import type { ScanResult } from '@/lib/schemas';
+import { rankCandidates } from '@/lib/rank';
 
 export function buildReportMarkdown(result: ScanResult): string {
+  const candidates = rankCandidates(result.candidates);
   const lines: string[] = [];
   lines.push(`# Codex-Readiness Report`);
   lines.push('');
@@ -9,10 +11,10 @@ export function buildReportMarkdown(result: ScanResult): string {
   lines.push('');
   lines.push(result.summary);
   lines.push('');
-  lines.push(`## Candidates (${result.candidates.length})`);
+  lines.push(`## Candidates (${candidates.length})`);
   lines.push('');
 
-  result.candidates.forEach((c, i) => {
+  candidates.forEach((c, i) => {
     lines.push(`### ${i + 1}. ${c.title}`);
     lines.push('');
     lines.push(
@@ -24,7 +26,7 @@ export function buildReportMarkdown(result: ScanResult): string {
     lines.push('');
   });
 
-  const total = result.candidates.reduce((s, c) => s + c.estimatedMinutesSaved, 0);
+  const total = candidates.reduce((s, c) => s + c.estimatedMinutesSaved, 0);
   lines.push(`## Total estimated one-time savings`);
   lines.push('');
   lines.push(`~${total} minutes (~${Math.round((total / 60) * 10) / 10} hours)`);

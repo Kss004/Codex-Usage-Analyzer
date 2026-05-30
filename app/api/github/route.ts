@@ -1,25 +1,7 @@
 import { INPUT_CAP_CHARS } from '@/lib/models';
+import { isCodeFile, parseRepoUrl } from '@/lib/code-files';
 
 export const maxDuration = 30;
-
-const CODE_EXT = new Set([
-  'ts', 'tsx', 'js', 'jsx', 'py', 'go', 'rs', 'java', 'rb', 'php', 'c', 'cpp', 'h', 'hpp',
-  'cs', 'kt', 'swift', 'scala', 'sh', 'sql',
-]);
-
-const SKIP_DIRS = ['node_modules/', 'dist/', 'build/', '.next/', 'vendor/', '.git/', 'test', 'spec', '__tests__'];
-
-function parseRepo(url: string): { owner: string; repo: string } | null {
-  try {
-    const u = new URL(url.trim());
-    if (u.hostname !== 'github.com') return null;
-    const parts = u.pathname.split('/').filter(Boolean);
-    if (parts.length < 2) return null;
-    return { owner: parts[0], repo: parts[1].replace(/\.git$/, '') };
-  } catch {
-    return null;
-  }
-}
 
 function ghHeaders(): HeadersInit {
   const h: HeadersInit = { Accept: 'application/vnd.github+json' };
@@ -32,7 +14,7 @@ function ghHeaders(): HeadersInit {
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const url = typeof body?.url === 'string' ? body.url : '';
-  const parsed = parseRepo(url);
+  const parsed = parseRepoUrl(url);
   if (!parsed) {
     return Response.json({ error: 'Enter a valid github.com/owner/repo URL' }, { status: 400 });
   }
@@ -61,14 +43,7 @@ export async function POST(req: Request) {
   }
   const treeJson = await treeRes.json();
   const files: Array<{ path: string; size: number }> = (treeJson.tree ?? [])
-    .filter((n: { type: string; path: string; size?: number }) => {
-      if (n.type !== 'blob') return false;
-      const ext = n.path.split('.').pop()?.toLowerCase() ?? '';
-      if (!CODE_EXT.has(ext)) return false;
-      const lower = n.path.toLowerCase();
-      if (SKIP_DIRS.some((d) => lower.includes(d))) return false;
-      return true;
-    })
+    .filter((n: { type: string; path: string; size?: number }) => n.type === 'blob' && isCodeFile(n.path))
     .sort((a: { size?: number }, b: { size?: number }) => (b.size ?? 0) - (a.size ?? 0))
     .slice(0, 12);
 

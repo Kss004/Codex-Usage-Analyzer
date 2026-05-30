@@ -24,6 +24,9 @@ export async function POST(req: Request) {
     model: openai(MODELS.audit),
     system: auditSystemPrompt,
     prompt: auditUserPrompt({ candidateId, title, category, reason, snippet }),
+    providerOptions: {
+      openai: { reasoningEffort: 'medium' },
+    },
   });
 
   return result.toTextStreamResponse();
