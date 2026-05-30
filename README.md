@@ -2,6 +2,8 @@
 
 > Paste your code. In 10 seconds, see where OpenAI Codex would actually earn its keep on it.
 
+**Live:** https://codex-usage-analyzer.vercel.app
+
 Submission for the **OpenAI + AI Builders India Hackathon** (2026-05-25 → 2026-06-01).
 
 A meta-product that sells Codex to skeptics: the analyzer pinpoints high-complexity functions, repetitive patterns, and test-coverage gaps where Codex would save the most engineering time — then lets you watch Codex actually attempt the change, with a conservative ROI estimate.
