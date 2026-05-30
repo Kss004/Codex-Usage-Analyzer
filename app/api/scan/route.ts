@@ -23,6 +23,9 @@ export async function POST(req: Request) {
     output: Output.object({ schema: ScanResultSchema }),
     system: scanSystemPrompt,
     prompt: scanUserPrompt(truncated),
+    providerOptions: {
+      openai: { reasoningEffort: 'low' },
+    },
   });
 
   return result.toTextStreamResponse();

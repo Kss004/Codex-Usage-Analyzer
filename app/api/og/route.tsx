@@ -20,30 +20,33 @@ export async function GET(req: Request) {
           flexDirection: 'column',
           justifyContent: 'space-between',
           background: '#09090b',
-          padding: 64,
+          padding: '64px',
           fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ color: '#71717a', fontSize: 28, letterSpacing: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', color: '#71717a', fontSize: 28, letterSpacing: 2 }}>
             CODEX USAGE ANALYZER
           </div>
-          <div style={{ color: '#fafafa', fontSize: 40, fontWeight: 700 }}>
+          <div style={{ display: 'flex', color: '#fafafa', fontSize: 40, fontWeight: 700, marginTop: 8 }}>
             Codex-Readiness Score
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24 }}>
-          <div style={{ color: scoreColor, fontSize: 200, fontWeight: 800, lineHeight: 1 }}>
-            {score}
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', color: scoreColor, fontSize: 200, fontWeight: 800, lineHeight: 1 }}>
+            {String(score)}
           </div>
-          <div style={{ color: '#71717a', fontSize: 40, paddingBottom: 32 }}>/ 100</div>
+          <div style={{ display: 'flex', color: '#71717a', fontSize: 40, paddingBottom: 32, marginLeft: 24 }}>
+            / 100
+          </div>
           <div
             style={{
+              display: 'flex',
               color: '#a1a1aa',
               fontSize: 28,
               paddingBottom: 40,
-              paddingLeft: 16,
+              marginLeft: 24,
               textTransform: 'uppercase',
             }}
           >
