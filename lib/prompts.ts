@@ -51,6 +51,49 @@ Output format (STRICT):
 
 No other prose outside these two blocks.`;
 
+export const SKEPTIC_PERSONAS = {
+  cfo: 'a skeptical CFO who only cares about dollars, risk, and payback period',
+  senior_engineer:
+    'a skeptical senior engineer who thinks AI coding tools are hype and write worse code than they do',
+  cto: 'a pragmatic CTO weighing whether to expand the team\'s Codex/Copilot seat budget',
+} as const;
+
+export type SkepticPersona = keyof typeof SKEPTIC_PERSONAS;
+
+export function skepticSystemPrompt(persona: SkepticPersona): string {
+  return `You are writing a short, persuasive briefing aimed at ${SKEPTIC_PERSONAS[persona]}.
+
+You are given the results of a Codex-Readiness scan of a real codebase. Turn those findings into a tight, evidence-led pitch that would move this specific skeptic toward adopting OpenAI Codex.
+
+Rules:
+- Lead with the single most concrete number from the scan.
+- Reference the actual flagged candidates — do not speak in generalities.
+- Match the skeptic's language: dollars and payback for the CFO, code quality and verification burden for the senior engineer, budget and team leverage for the CTO.
+- Be honest and non-hyperbolic. A skeptic smells inflated claims instantly.
+- 150-220 words. No headings, no bullet spam — 2-3 short paragraphs.`;
+}
+
+export function skepticUserPrompt(args: {
+  language: string;
+  readiness: number;
+  summary: string;
+  candidates: Array<{ title: string; category: string; estimatedMinutesSaved: number }>;
+}): string {
+  const list = args.candidates
+    .map((c) => `- ${c.title} (${c.category}, ~${c.estimatedMinutesSaved} min)`)
+    .join('\n');
+  return `Scan results:
+
+Language: ${args.language}
+Codex-Readiness Score: ${args.readiness}/100
+Summary: ${args.summary}
+
+Flagged candidates:
+${list}
+
+Write the briefing.`;
+}
+
 export function auditUserPrompt(args: {
   candidateId: string;
   title: string;

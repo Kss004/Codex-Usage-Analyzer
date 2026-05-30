@@ -3,6 +3,7 @@
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { INPUT_CAP_CHARS } from '@/lib/models';
+import { SAMPLES } from '@/lib/samples';
 
 export function PasteInput({
   value,
@@ -19,6 +20,21 @@ export function PasteInput({
 
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">Try a sample:</span>
+        {SAMPLES.map((s) => (
+          <Button
+            key={s.label}
+            size="sm"
+            variant="outline"
+            onClick={() => onChange(s.code)}
+            disabled={loading}
+          >
+            {s.label}
+          </Button>
+        ))}
+      </div>
+
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -31,11 +47,7 @@ export function PasteInput({
           {value.length.toLocaleString()} / {INPUT_CAP_CHARS.toLocaleString()} chars
           {overCap ? <span className="ml-2 text-amber-500">will be truncated</span> : null}
         </span>
-        <Button
-          onClick={onSubmit}
-          disabled={loading || !value.trim()}
-          size="sm"
-        >
+        <Button onClick={onSubmit} disabled={loading || !value.trim()} size="sm">
           {loading ? 'Scanning…' : 'Quick Scan'}
         </Button>
       </div>
