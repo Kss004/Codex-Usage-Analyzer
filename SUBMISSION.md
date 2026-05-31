@@ -59,7 +59,7 @@ Meanwhile, a CFO staring at a $19–$200/seat Codex/Copilot/Cursor bill has no d
 
 ## Mapped to judging criteria
 
-**Technical Execution** — Multi-input (paste / zip / GitHub URL), real streaming structured output via AI SDK v6 + Zod, two-model pipeline, OG image generation, client-side zip handling, clean `bun run build` + `tsc` with 8 routes deployed on Fluid Compute.
+**Technical Execution** — Multi-input (paste / zip / GitHub URL), real streaming structured output via AI SDK v6 + Zod, two-model pipeline, OG image generation, client-side zip handling, clean `bun run build` + `tsc` with 8 routes deployed on Fluid Compute. Backed by **50 unit tests + a live LLM eval harness** (see Testing & Evals below) — including an eval that caught a real model-ordering bug, fixed deterministically in code.
 
 **Problem Solving & Usefulness** — Targets a real, data-backed gap (the 84%/29% trust chasm, METR's 19% slowdown). Output is immediately actionable: ranked candidates, a real diff, an ROI number a CFO can act on.
 
@@ -68,6 +68,28 @@ Meanwhile, a CFO staring at a $19–$200/seat Codex/Copilot/Cursor bill has no d
 **Usage of Codex & OpenAI Tools** — GPT-5 + GPT-5-mini in two distinct roles, structured streaming, reasoning-effort tuning — plus the build itself was Codex-driven.
 
 **Product Demo & Presentation** — One-click sample loader, sub-3s first byte, visceral colour diff + ROI card, shareable score. Demo flow is rehearsed (script below).
+
+---
+
+## Testing & Evals
+
+Quality is backed by evidence, not assertion. Run with `bun test` and `bun run eval`.
+
+**Unit suite — 50 tests across 6 files** (`tests/`, deterministic, no network):
+
+- `parse-audit` — extracts the streamed `diff` + `json` metadata blocks; covers partial/streaming input, malformed JSON, schema-validation failure, and no-fence input (never throws, never blank-screens — falls back to raw).
+- `rank` — deterministic candidate ordering by Codex-Fit Score (stable, non-mutating).
+- `roi` — ROI math, team-size clamping, rounding, currency formatting.
+- `code-files` — source-file detection + GitHub repo-URL parsing, including rejection of spoofed hosts (e.g. `evil.com/github.com/...`) and skip-dir filtering.
+- `export-md` — Markdown report structure + totals, empty-input safety.
+- `schemas` — Zod bounds enforcement (score ≤ 100, minutes ≤ 480, ≤ 10 candidates, enum rejection).
+
+**LLM eval harness** (`evals/scan.eval.ts`, property-based, hits the real API):
+
+- Asserts invariants rather than exact strings: schema validity, score ranges `[0,100]`, minutes `[0,480]`, expected categories surface, and **readiness sanity** (messy code scores high, a clean one-liner scores low).
+- This eval **caught a real bug**: the model did not reliably return candidates ordered by score. The fix was deterministic — `lib/rank.ts` enforces ordering in code (unit-tested), wired into both the UI and the report export. We don't trust the LLM for anything we can guarantee ourselves.
+
+**Verification gate before every deploy:** `bun test && bun run build` (Next build runs `tsc`), plus a live smoke test of `/api/scan`, `/api/audit`, `/api/github`, and `/api/og` on the production URL.
 
 ---
 

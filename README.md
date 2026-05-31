@@ -42,19 +42,20 @@ bun install
 bun dev                       # → http://localhost:3000
 ```
 
-Production build smoke test: `bun run build`.
+## Testing
 
-## Status
+```bash
+bun test        # 50 unit tests (parse-audit, rank, roi, code-files, export-md, schemas)
+bun run eval    # live LLM eval — property-based, needs OPENAI_API_KEY
+bun run build   # production build + TypeScript check
+```
 
-**Day 3 of 7.** Phase 1 research + Phase 2 product docs + Phase 3 tech docs done. App bootstrapped (Next.js 16 + Turbopack + Tailwind v4 + shadcn + AI SDK v6 + Zod 4). Quick Scan paste-code MVP wired end-to-end (server: `streamText` with `Output.object(ScanResultSchema)` against `gpt-5-mini`; client: `experimental_useObject` streams partial result into ranked cards). Deep Audit endpoint exists; ROI card parser pending. See [docs/product/roadmap.md](docs/product/roadmap.md).
+The LLM eval asserts invariants (schema validity, score ranges, category presence, readiness sanity on messy vs clean code). It surfaced that the model doesn't reliably order candidates — fixed deterministically in `lib/rank.ts`, wired into UI + report export.
 
-### What works
-- Paste code → Quick Scan streams ranked candidates as they arrive.
-- Click "Run Deep Audit" on a candidate → `gpt-5` streams a diff inline.
-- Build is clean (`bun run build` ✓).
+## Features
 
-### What's next
-1. Parse JSON metadata block from Deep Audit response → ROI card component.
-2. Zip upload input (Day 4).
-3. GitHub URL input via Octokit (Day 5, stretch).
-4. Polish + Loom recording (Day 6-7).
+- **Quick Scan** — paste code / drop a zip / paste a GitHub URL → `gpt-5-mini` streams ranked, line-cited candidates with a 0–100 Codex-Readiness Score.
+- **Deep Audit** — `gpt-5` attempts the change on any candidate → colour-highlighted diff + ROI card (complexity before→after, minutes saved, caveats).
+- **ROI calculator**, **Skeptic Mode** (CFO/engineer/CTO pitch), **Markdown export**, shareable **OG score card**.
+
+Stack: Next.js 16 (App Router) · AI SDK v6 (`streamText` + `Output.object`) · GPT-5 / GPT-5-mini · Zod 4 · shadcn/ui · Bun · Vercel Fluid Compute.
